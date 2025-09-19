@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-// In development, the proxy will route requests to the backend
-// In production, the Express server will serve both API and static files
-const BASE_URL = process.env.NODE_ENV === 'production' ? '/api' : '/api';
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const api = axios.create({
   baseURL: BASE_URL,

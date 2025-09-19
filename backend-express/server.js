@@ -3,9 +3,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const path = require('path');
-const learningPlanRoutes = require('./routes/learningPlanRoutes');
-const errorHandler = require('./middleware/errorHandler');
+const learningPlanRoutes = require('./src/routes/learningPlanRoutes');
+const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -34,7 +33,7 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// API Routes
+// Routes
 app.use('/api', learningPlanRoutes);
 
 // Health check endpoint
@@ -46,31 +45,21 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Serve static files from the React app build directory
-const buildPath = path.join(__dirname, '../build');
-app.use(express.static(buildPath));
-
-// Catch all handler: send back React's index.html file for any non-API routes
-app.get('*', (req, res) => {
-  // Don't serve React app for API routes
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({
-      error: 'Not Found',
-      message: 'The requested API resource was not found'
-    });
-  }
-  
-  res.sendFile(path.join(buildPath, 'index.html'));
-});
-
 // Error handling middleware
 app.use(errorHandler);
 
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: 'The requested resource was not found'
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Learning Plan Generator is running on port ${PORT}`);
+  console.log(`🚀 Learning Plan Generator API is running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🌐 Frontend: http://localhost:${PORT}`);
 });
 
 module.exports = app; 
